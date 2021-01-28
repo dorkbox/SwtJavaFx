@@ -1,0 +1,24 @@
+ - SwtJavaFx - Swt and JavaFx Utilities
+   [The Apache Software License, Version 2.0]
+   https://git.dorkbox.com/dorkbox/SwtJavaFx
+   Copyright 2021
+     Dorkbox LLC
+
+   Extra license information
+     - Eclipse Platform - Frameworks and common services to support the use of Eclipse and it's tools (SWT)
+       [Eclipse Public License (EPL)]
+       https://projects.eclipse.org/projects/eclipse.platform
+       Copyright 2021
+         The Eclipse Foundation, Inc.
+
+     - OpenJFX - OpenJFX client application platform for desktop, mobile and embedded systems
+       [GNU General Public License, version 2, with the Classpath Exception]
+       https://github.com/openjdk/jfx
+       Copyright 2021
+         Oracle and/or its affiliates
+
+     - SLF4J - Simple facade or abstraction for various logging frameworks
+       [MIT License]
+       http://www.slf4j.org
+       Copyright 2021
+         QOS.ch
