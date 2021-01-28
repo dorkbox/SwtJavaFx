@@ -58,12 +58,6 @@ GradleUtils.fixIntellijPaths()
 GradleUtils.defaultResolutionStrategy()
 GradleUtils.compileConfiguration(JavaVersion.VERSION_1_8)
 
-//var paths = System.getProperty("org.gradle.java.installations.paths", "")
-//paths += ",/custom/path/jdk1.8,/shared/jre11"
-//System.setProperty("org.gradle.java.installations.paths", paths)
-//println(paths)
-
-
 licensing {
     license(License.APACHE_2) {
         description(Extras.description)
@@ -120,8 +114,6 @@ dependencies {
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
         // Paths for the various executables in the Java 'bin' directory
         val javaHome = "D:/Code/extras/jdk1.8.0_181-oracle"
-//        val javaCompilerPath = "$javaHome/bin/javac.exe"
-//        val javaExecutablePath = "$javaHome/bin/java.exe"
 
         val javaFxFile = File("$javaHome/jre/lib/ext/jfxrt.jar")
         println("\tJavaFX: $javaFxFile")
@@ -146,27 +138,6 @@ dependencies {
         compileOnly("org.openjfx:javafx-controls:11:${platform}")
     }
 }
-
-
-//tasks.named<JavaCompile>("compileJava") {
-//    sourceCompatibility = "8"
-//    targetCompatibility = "8"
-//
-//    // The sourceCompatibility and targetCompatibility properties have been removed
-//    options.encoding = "UTF-8"
-//    options.isFork = true
-//    options.forkOptions.executable = javaCompilerPath
-//    options.forkOptions.javaHome = file(javaHome)
-//
-//    targetCompatibility = "1.8"
-//    sourceCompatibility = "1.8"
-//}
-//
-//
-//tasks.named<JavaCompile>("compileMain_Java11Java") {
-//    sourceCompatibility = "11"
-//    targetCompatibility = "11"
-//}
 
 
 publishToSonatype {
