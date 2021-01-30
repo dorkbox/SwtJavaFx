@@ -41,6 +41,9 @@ class JavaFx {
         // We cannot use getToolkit(), because if JavaFX is not being used, calling getToolkit() will initialize it...
         // see: https://bugs.openjdk.java.net/browse/JDK-8090933
 
+        String fullJavaVersion = System.getProperty("java.version", "");
+        boolean isJava8 = fullJavaVersion.startsWith("1.") && fullJavaVersion.charAt(2) == '8';
+
         Class<?> javaFxLoggerClass = AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             @Override
             public
@@ -57,16 +60,41 @@ class JavaFx {
             }
         });
 
-
         boolean isJavaFxLoaded_ = false;
         try {
             if (javaFxLoggerClass != null) {
-                // this is important to use reflection, because if JavaFX is not being used, calling getToolkit() will initialize it...
-                Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
-                m.setAccessible(true);
-                ClassLoader cl = ClassLoader.getSystemClassLoader();
+                // try to avoid using reflection!
 
-                isJavaFxLoaded_ = (null != m.invoke(cl, "com.sun.javafx.tk.Toolkit")) || (null != m.invoke(cl, "javafx.application.Application"));
+                // first, walk the stack to see if any JavaFX classes are used (which indicate that we are running with JavaFX)
+                StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+                for (int i = 0; i < stackTrace.length; i++) {
+                    if (stackTrace[i].getClassName().contains("javafx")) {
+                        isJavaFxLoaded_ = true;
+                        break;
+                    }
+                }
+
+                // this is important to use reflection, because if JavaFX is not being used, calling getToolkit() will initialize it...
+                if (!isJavaFxLoaded_) {
+                    // stack walking failed, resort to using a property (emit a warning)
+                    String usingJavFx = System.getProperty("usingJavaFx", "false");
+                    if (!usingJavFx.equals("false")) {
+                        // if it is set to ANYTHING other than exactly "false", then we are using javaFX. Skip reflection testing
+                        isJavaFxLoaded_ = true;
+                    } else {
+                        // stack walking and property check failed, resort to using reflection.
+                        // WE DON'T always want to do this BECAUSE Java9+ really doesn't like reflection!
+                        LoggerFactory.getLogger(JavaFx.class).debug("Using reflection to detect if JavaFX is loaded.\n" +
+                                "To avoid using reflection, set the system property \"usingJavaFx\" to \"true\" before your application starts.  " +
+                                "For example: System.setProperty(\"usingJavaFx\", \"true\");");
+
+                        Method m = ClassLoader.class.getDeclaredMethod("findLoadedClass", String.class);
+                        m.setAccessible(true);
+                        ClassLoader cl = ClassLoader.getSystemClassLoader();
+
+                        isJavaFxLoaded_ = (null != m.invoke(cl, "com.sun.javafx.tk.Toolkit")) || (null != m.invoke(cl, "javafx.application.Application"));
+                    }
+                }
             }
         } catch (Throwable e) {
             LoggerFactory.getLogger(JavaFx.class).debug("Error detecting if JavaFX is loaded", e);
@@ -85,8 +113,7 @@ class JavaFx {
 
             // https://github.com/teamfx/openjfx-9-dev-rt/blob/master/modules/javafx.graphics/src/main/java/com/sun/glass/ui/gtk/GtkApplication.java
 
-            String fullJavaVersion = System.getProperty("java.version", "");
-            if (fullJavaVersion.startsWith("1.") && fullJavaVersion.charAt(2) == '8') {
+            if (isJava8) {
                 // JavaFX from Oracle Java 8 is GTK2 only. Java9 can have it be GTK3 if -Djdk.gtk.version=3 is specified
                 // see http://mail.openjdk.java.net/pipermail/openjfx-dev/2016-May/019100.html
                 isJavaFxGtk3_ = false;
