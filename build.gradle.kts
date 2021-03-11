@@ -28,7 +28,7 @@ gradle.startParameter.warningMode = WarningMode.All
 plugins {
     java
 
-    id("com.dorkbox.GradleUtils") version "1.12"
+    id("com.dorkbox.GradleUtils") version "1.15"
     id("com.dorkbox.Licensing") version "2.5.4"
     id("com.dorkbox.VersionUpdate") version "2.1"
     id("com.dorkbox.GradlePublish") version "1.9.1"
@@ -48,6 +48,11 @@ object Extras {
     const val url = "https://git.dorkbox.com/dorkbox/SwtJavaFx"
 
     val buildDate = Instant.now().toString()
+
+    // This is really SWT version 4.xx? no idea how the internal versions are tracked
+    // 4.4 is the oldest version that works with us, and the release of SWT is sPecIaL!
+    // 3.108.0 is the MOST RECENT version supported by x86. All newer version no longer support x86
+    const val swtVersion = "3.115.100"
 }
 
 ///////////////////////////////
@@ -102,8 +107,8 @@ tasks.jar.get().apply {
 dependencies {
     implementation("org.slf4j:slf4j-api:1.7.30")
 
-    //  because the eclipse release of SWT is sPecIaL! Version numbers that make sense... Whaaaaaaat?
-    compileOnly(GradleUtils.getSwtMavenId("3.114.100")) {
+    // This is explicitly linux because we access GTK internals (and it's only available on the linux GTK version of SWT)
+    compileOnly(dorkbox.gradle.SwtType.LINUX_64.fullId(Extras.swtVersion)) {
         isTransitive = false
     }
 

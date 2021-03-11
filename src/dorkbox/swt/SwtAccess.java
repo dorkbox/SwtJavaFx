@@ -1,5 +1,6 @@
 package dorkbox.swt;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.AccessController;
 import java.security.PrivilegedAction;
@@ -44,30 +45,20 @@ class SwtAccess {
         return SWT.getVersion();
     }
 
-    /**
-     * This is only necessary for linux.
-     *
-     * @return true if SWT is GTK3. False if SWT is GTK2. If for some reason we DO NOT KNOW, then we return false (GTK2).
-     */
-    static boolean isGtk3() {
-        boolean isLinux = System.getProperty("os.name", "").toLowerCase(Locale.US).startsWith("linux");
-        if (!isLinux) {
-            return false;
-        }
 
-        // required to use reflection, because this is an internal class!
-        final String SWT_INTERNAL_CLASS = "org.eclipse.swt.internal.gtk.OS";
-        Class<?> osClass = AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
+    private static
+    int getViaReflection(String clazz) throws InvocationTargetException, IllegalAccessException {
+        final Class<?> osClass  = AccessController.doPrivileged(new PrivilegedAction<Class<?>>() {
             @Override
             public
             Class<?> run() {
                 try {
-                    return Class.forName(SWT_INTERNAL_CLASS, true, ClassLoader.getSystemClassLoader());
+                    return Class.forName(clazz, true, ClassLoader.getSystemClassLoader());
                 } catch (Exception ignored) {
                 }
 
                 try {
-                    return Class.forName(SWT_INTERNAL_CLASS, true, Thread.currentThread().getContextClassLoader());
+                    return Class.forName(clazz, true, Thread.currentThread().getContextClassLoader());
                 } catch (Exception ignored) {
                 }
 
@@ -75,36 +66,48 @@ class SwtAccess {
             }
         });
 
-
-        if (osClass == null) {
-            return false;
-        }
-
-        final Class<?> clazz = osClass;
         Method method = AccessController.doPrivileged(new PrivilegedAction<Method>() {
             @Override
             public
             Method run() {
                 try {
-                    return clazz.getMethod("gtk_major_version");
+                    return osClass.getMethod("gtk_major_version");
                 } catch (Exception e) {
                     return null;
                 }
             }
         });
 
-        if (method == null) {
+        // might throw an exception!
+        return ((Number)method.invoke(osClass)).intValue();
+    }
+
+    /**
+     * This is only necessary for linux.
+     *
+     * @return true if SWT is GTK3. False if SWT is GTK2 or unknown.
+     */
+    static boolean isGtk3() {
+        boolean isLinux = System.getProperty("os.name", "").toLowerCase(Locale.US).startsWith("linux");
+        if (!isLinux) {
             return false;
         }
 
-        int version = 0;
         try {
-            version = ((Number)method.invoke(osClass)).intValue();
-        } catch (Exception ignored) {
-            // this method doesn't exist.
+            return org.eclipse.swt.internal.gtk.GTK.gtk_get_major_version() == 3;
+        } catch (Exception e) {
+            // this might be an older/different version of SWT! Try reflection.
+            try {
+                return getViaReflection("org.eclipse.swt.internal.gtk.GTK") == 3;
+            } catch (Exception e1) {
+                try {
+                    return getViaReflection("org.eclipse.swt.internal.gtk.OS") == 3;
+                } catch (Exception ignored) {
+                }
+            }
         }
 
-        return version == 3;
+        return false;
     }
 
     static
