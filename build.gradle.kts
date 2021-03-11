@@ -28,10 +28,10 @@ gradle.startParameter.warningMode = WarningMode.All
 plugins {
     java
 
-    id("com.dorkbox.GradleUtils") version "1.15"
-    id("com.dorkbox.Licensing") version "2.5.4"
+    id("com.dorkbox.GradleUtils") version "1.16"
+    id("com.dorkbox.Licensing") version "2.5.5"
     id("com.dorkbox.VersionUpdate") version "2.1"
-    id("com.dorkbox.GradlePublish") version "1.9.1"
+    id("com.dorkbox.GradlePublish") version "1.10"
 }
 
 object Extras {
