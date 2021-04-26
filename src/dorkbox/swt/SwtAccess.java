@@ -119,20 +119,4 @@ class SwtAccess {
     boolean isEventThread() {
         return Thread.currentThread() == currentDisplayThread;
     }
-
-    static
-    void onShutdown(final Runnable runnable) {
-        // currentDisplay.getShells() must only be called inside the event thread!
-        if (isEventThread()) {
-            SwtAccess.onShutdown(currentDisplay, runnable);
-        } else {
-            dispatch(new Runnable() {
-                @Override
-                public
-                void run() {
-                    SwtAccess.onShutdown(currentDisplay, runnable);
-                }
-            });
-        }
-    }
 }

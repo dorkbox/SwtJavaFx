@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 dorkbox, llc
+ * Copyright 2021 dorkbox, llc
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -13,21 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package dorkbox.javaFx;
+
+package dorkbox.swt;
 
 /**
- * Utility methods for JavaFX.
+ * Required for intellij to not complain regarding `module-info` for a multi-release jar.
+ * This file is completely ignored by the gradle build process
  */
 public
-class JavaFxAccess {
-    static
-    void dispatch(final Runnable runnable) {
-        javafx.application.Platform.runLater(runnable);
-    }
-
-    static
-    boolean isEventThread() {
-        // JAVA 8
-        return com.sun.javafx.tk.Toolkit.getToolkit().isFxUserThread();
-    }
-}
+class EmptyClass {}

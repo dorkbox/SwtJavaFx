@@ -79,9 +79,4 @@ class Swt {
     boolean isEventThread() {
         return SwtAccess.isEventThread();
     }
-
-    public static
-    void onShutdown(final Runnable runnable) {
-        SwtAccess.onShutdown(runnable);
-    }
 }

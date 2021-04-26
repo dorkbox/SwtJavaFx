@@ -145,9 +145,4 @@ class JavaFx {
     boolean isEventThread() {
         return JavaFxAccess.isEventThread();
     }
-
-    public static
-    void onShutdown(final Runnable runnable) {
-        JavaFxAccess.onShutdown(runnable);
-    }
 }

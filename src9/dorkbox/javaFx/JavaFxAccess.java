@@ -27,7 +27,7 @@ class JavaFxAccess {
 
     static
     boolean isEventThread() {
-        // JAVA 8
-        return com.sun.javafx.tk.Toolkit.getToolkit().isFxUserThread();
+        // JAVA 9+
+        return javafx.application.Platform.isFxApplicationThread();
     }
 }
