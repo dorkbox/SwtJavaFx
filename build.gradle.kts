@@ -23,22 +23,19 @@ import java.time.Instant
 ///////////////////////////////
 
 gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS   // always show the stacktrace!
-gradle.startParameter.warningMode = WarningMode.All
 
 plugins {
-    java
-
-    id("com.dorkbox.GradleUtils") version "1.16"
-    id("com.dorkbox.Licensing") version "2.5.5"
-    id("com.dorkbox.VersionUpdate") version "2.1"
-    id("com.dorkbox.GradlePublish") version "1.10"
+    id("com.dorkbox.GradleUtils") version "2.6"
+    id("com.dorkbox.Licensing") version "2.6"
+    id("com.dorkbox.VersionUpdate") version "2.3"
+    id("com.dorkbox.GradlePublish") version "1.11"
 }
 
 object Extras {
     // set for the project
     const val description = "Swt and JavaFx Utilities"
     const val group = "com.dorkbox"
-    const val version = "1.1"
+    const val version = "1.2"
 
     // set as project.ext
     const val name = "SwtJavaFx"
@@ -59,9 +56,9 @@ object Extras {
 /////  assign 'Extras'
 ///////////////////////////////
 GradleUtils.load("$projectDir/../../gradle.properties", Extras)
-GradleUtils.fixIntellijPaths()
-GradleUtils.defaultResolutionStrategy()
+GradleUtils.defaults()
 GradleUtils.compileConfiguration(JavaVersion.VERSION_1_8)
+//GradleUtils.jpms(JavaVersion.VERSION_1_9)
 
 licensing {
     license(License.APACHE_2) {
@@ -69,22 +66,6 @@ licensing {
         author(Extras.vendor)
         url(Extras.url)
     }
-}
-
-sourceSets {
-    main {
-        java {
-            setSrcDirs(listOf("src"))
-
-            // want to include java files for the source. 'setSrcDirs' resets includes...
-            include("**/*.java")
-        }
-    }
-}
-
-repositories {
-    mavenLocal() // this must be first!
-    jcenter()
 }
 
 tasks.jar.get().apply {
@@ -99,18 +80,27 @@ tasks.jar.get().apply {
         attributes["Implementation-Title"] = "${Extras.group}.${Extras.id}"
         attributes["Implementation-Version"] = Extras.buildDate
         attributes["Implementation-Vendor"] = Extras.vendor
-
-        attributes["Automatic-Module-Name"] = Extras.id
     }
 }
 
 dependencies {
-    implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("org.slf4j:slf4j-api:1.8.0-beta4")
 
     // This is explicitly linux because we access GTK internals (and it's only available on the linux GTK version of SWT)
+    // we use ALL of the swt dependencies, this way any implementation will work
+    // 32-bit support was dropped by eclipse since 4.10 (3.108.0 is the oldest that is 32 bit)
+
     compileOnly(dorkbox.gradle.SwtType.LINUX_64.fullId(Extras.swtVersion)) {
         isTransitive = false
     }
+//    compileOnly(dorkbox.gradle.SwtType.WIN_64.fullId(Extras.swtVersion)) {
+//        isTransitive = false
+//    }
+//    compileOnly(dorkbox.gradle.SwtType.MAC_64.fullId(Extras.swtVersion)) {
+//        isTransitive = false
+//    }
+
+
 
     // NOTE: we must have GRADLE ITSELF using the Oracle 1.8 JDK (which includes JavaFX).
     //       OR we will manually include JavaFx11 (which JFX8, for what we use, is compatible)
@@ -143,7 +133,6 @@ dependencies {
         compileOnly("org.openjfx:javafx-controls:11:${platform}")
     }
 }
-
 
 publishToSonatype {
     groupId = Extras.group
