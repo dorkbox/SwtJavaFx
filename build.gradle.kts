@@ -26,7 +26,7 @@ gradle.startParameter.showStacktrace = ShowStacktrace.ALWAYS   // always show th
 
 plugins {
     id("com.dorkbox.GradleUtils") version "2.6"
-    id("com.dorkbox.Licensing") version "2.6"
+    id("com.dorkbox.Licensing") version "2.7"
     id("com.dorkbox.VersionUpdate") version "2.3"
     id("com.dorkbox.GradlePublish") version "1.11"
 }
@@ -35,7 +35,7 @@ object Extras {
     // set for the project
     const val description = "Swt and JavaFx Utilities"
     const val group = "com.dorkbox"
-    const val version = "1.2"
+    const val version = "1.3"
 
     // set as project.ext
     const val name = "SwtJavaFx"
@@ -57,8 +57,7 @@ object Extras {
 ///////////////////////////////
 GradleUtils.load("$projectDir/../../gradle.properties", Extras)
 GradleUtils.defaults()
-GradleUtils.compileConfiguration(JavaVersion.VERSION_1_8)
-//GradleUtils.jpms(JavaVersion.VERSION_1_9)
+GradleUtils.compileConfiguration(JavaVersion.VERSION_11)
 
 licensing {
     license(License.APACHE_2) {
@@ -84,7 +83,7 @@ tasks.jar.get().apply {
 }
 
 dependencies {
-    implementation("org.slf4j:slf4j-api:1.8.0-beta4")
+    implementation("com.dorkbox:Utilities:1.11")
 
     // This is explicitly linux because we access GTK internals (and it's only available on the linux GTK version of SWT)
     // we use ALL of the swt dependencies, this way any implementation will work
